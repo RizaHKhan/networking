@@ -1,4 +1,10 @@
-import { SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
+import {
+    DefaultInstanceTenancy,
+    IpAddresses,
+    IpProtocol,
+    Ipv6Addresses,
+    Vpc,
+} from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 
 interface Props {
@@ -11,19 +17,11 @@ interface Exports {
 
 export default ({ scope }: Props): Exports => {
     const vpc = new Vpc(scope, "VPC", {
-        maxAzs: 3,
-        natGateways: 1,
-        cidr: "10.16.0.0/24",
-        subnetConfiguration: [
-            {
-                name: "public",
-                subnetType: SubnetType.PUBLIC,
-            },
-            {
-                name: "private",
-                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-            },
-        ],
+        vpcName: "a4l-vpc1",
+        ipAddresses: IpAddresses.cidr("10.16.0.0/16"),
+        defaultInstanceTenancy: DefaultInstanceTenancy.DEFAULT,
+        ipProtocol: IpProtocol.DUAL_STACK,
+        ipv6Addresses: Ipv6Addresses.amazonProvided(),
     });
 
     return { vpc };
