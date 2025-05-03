@@ -1,4 +1,5 @@
 import {
+    AmazonLinuxGeneration,
     AmazonLinuxImage,
     Instance,
     InstanceClass,
@@ -34,9 +35,11 @@ export default ({ scope, vpc }: Props): Exports => {
             ],
         }),
         instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
-        machineImage: MachineImage.latestAmazonLinux2(),
         associatePublicIpAddress: false,
         ssmSessionPermissions: true,
+        machineImage: new AmazonLinuxImage({
+            generation: AmazonLinuxGeneration.AMAZON_LINUX_2,
+        }),
     });
 
     return { instance };
