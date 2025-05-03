@@ -17,14 +17,15 @@ interface Props {
     scope: Construct;
     vpc: Vpc;
     securityGroup: SecurityGroup;
+    name: string
 }
 
 interface Exports {
     instance: Instance;
 }
 
-export default ({ scope, vpc, securityGroup }: Props): Exports => {
-    const instance = new Instance(scope, "NetworkingInstance", {
+export default ({ scope, vpc, securityGroup, name }: Props): Exports => {
+    const instance = new Instance(scope, name, {
         vpc,
         vpcSubnets: {
             subnetType: SubnetType.PUBLIC,
