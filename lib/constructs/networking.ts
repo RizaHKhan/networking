@@ -19,7 +19,7 @@ interface Exports {
 export default ({ scope }: Props): Exports => {
     const vpc = new Vpc(scope, "VPC", {
         vpcName: "a4l-vpc1",
-        maxAzs: 4, // Default is all AZs in region
+        maxAzs: 1,
         ipAddresses: IpAddresses.cidr("10.16.0.0/16"), // 10.16.0.0 -> 10.16.255.255
         defaultInstanceTenancy: DefaultInstanceTenancy.DEFAULT,
         ipProtocol: IpProtocol.DUAL_STACK,
