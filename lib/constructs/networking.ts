@@ -37,7 +37,7 @@ export default ({ scope }: Props): Exports => {
             },
             {
                 name: "Web",
-                subnetType: SubnetType.PRIVATE_ISOLATED,
+                subnetType: SubnetType.PUBLIC,
                 cidrMask: 20,
             },
             {
