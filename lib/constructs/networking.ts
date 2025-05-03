@@ -3,6 +3,7 @@ import {
     IpAddresses,
     IpProtocol,
     Ipv6Addresses,
+    Peer,
     Port,
     SecurityGroup,
     SubnetType,
@@ -57,9 +58,9 @@ export default ({ scope }: Props): Exports => {
     });
 
     securityGroup.addIngressRule(
-        securityGroup,
-        Port.allTcp(),
-        "Allow ICMP traffic",
+        Peer.anyIpv4(),
+        Port.tcp(443),
+        "Allow SSM Traffic (HTTPS)",
     );
 
     return { vpc, securityGroup };
