@@ -7,8 +7,8 @@ export class NetworkingStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
-        const { vpc } = networking({ scope: this });
-        const { instance } = compute({ scope: this, vpc });
+        const { vpc, securityGroup } = networking({ scope: this });
+        const { instance } = compute({ scope: this, vpc, securityGroup });
 
         new CfnOutput(this, "InstanceID", {
             value: instance.instanceId,

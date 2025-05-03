@@ -3,6 +3,7 @@ import {
     IpAddresses,
     IpProtocol,
     Ipv6Addresses,
+    SecurityGroup,
     SubnetType,
     Vpc,
 } from "aws-cdk-lib/aws-ec2";
@@ -14,6 +15,7 @@ interface Props {
 
 interface Exports {
     vpc: Vpc;
+    securityGroup: SecurityGroup;
 }
 
 export default ({ scope }: Props): Exports => {
@@ -49,5 +51,9 @@ export default ({ scope }: Props): Exports => {
         ],
     });
 
-    return { vpc };
+    const securityGroup = new SecurityGroup(scope, "SecurityGroup", {
+        vpc,
+    });
+
+    return { vpc, securityGroup };
 };

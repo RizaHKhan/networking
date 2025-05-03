@@ -6,6 +6,7 @@ import {
     InstanceSize,
     InstanceType,
     MachineImage,
+    SecurityGroup,
     SubnetType,
     Vpc,
 } from "aws-cdk-lib/aws-ec2";
@@ -15,17 +16,20 @@ import { Construct } from "constructs";
 interface Props {
     scope: Construct;
     vpc: Vpc;
+    securityGroup: SecurityGroup;
 }
+
 interface Exports {
     instance: Instance;
 }
 
-export default ({ scope, vpc }: Props): Exports => {
+export default ({ scope, vpc, securityGroup }: Props): Exports => {
     const instance = new Instance(scope, "NetworkingInstance", {
         vpc,
         vpcSubnets: {
             subnetType: SubnetType.PUBLIC,
         },
+        securityGroup,
         role: new Role(scope, "InstanceRole", {
             assumedBy: new ServicePrincipal("ec2.amazonaws.com"),
             managedPolicies: [
