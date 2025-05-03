@@ -7,6 +7,7 @@ import {
     IpAddresses,
     IpProtocol,
     Ipv6Addresses,
+    Peer,
     Port,
     SecurityGroup,
     SubnetType,
@@ -65,9 +66,9 @@ export default ({ scope, logGroup, logRole }: Props): Exports => {
     });
 
     securityGroup.addIngressRule(
-        securityGroup,
-        Port.allTcp(),
-        "Allow ICMP traffic",
+        Peer.anyIpv4(),
+        Port.tcp(443),
+        "Allow HTTPS traffic from anywhere",
     );
 
     new FlowLog(scope, "FlowLog", {
