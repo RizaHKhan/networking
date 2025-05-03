@@ -8,7 +8,12 @@ export class NetworkingStack extends Stack {
         super(scope, id, props);
 
         const { vpc, securityGroup } = networking({ scope: this });
-        const { instance } = compute({ scope: this, vpc, securityGroup });
+        const { instance } = compute({
+            scope: this,
+            name: "NetworkingInstance",
+            vpc,
+            securityGroup,
+        });
 
         new CfnOutput(this, "InstanceID", {
             value: instance.instanceId,
