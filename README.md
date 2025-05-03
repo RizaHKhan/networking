@@ -73,3 +73,25 @@ For this course ... the "Cluster" placement group is the most relevant because i
 - Authentication
 - User-Data
 - NOT AUTHENTICATED or ENCRYPTED
+
+```
+sh-4.2$ ifconfig
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 9001
+        inet 10.16.135.15  netmask 255.255.240.0  broadcast 10.16.143.255
+        inet6 2600:1f18:3c92:db08:b1d1:5844:df29:c0c9  prefixlen 128  scopeid 0x0<global>
+        inet6 fe80::c3c:4cff:fefd:7669  prefixlen 64  scopeid 0x20<link>
+        ether 0e:3c:4c:fd:76:69  txqueuelen 1000  (Ethernet)
+        RX packets 60429  bytes 84073006 (80.1 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 4216  bytes 363775 (355.2 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 48  bytes 3888 (3.7 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 48  bytes 3888 (3.7 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+```
