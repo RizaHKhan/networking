@@ -1,25 +1,37 @@
 import {
     DefaultInstanceTenancy,
+    FlowLog,
+    FlowLogDestination,
+    FlowLogMaxAggregationInterval,
+    FlowLogResourceType,
     IpAddresses,
     IpProtocol,
     Ipv6Addresses,
+    Port,
+    SecurityGroup,
     SubnetType,
     Vpc,
 } from "aws-cdk-lib/aws-ec2";
+import { Role } from "aws-cdk-lib/aws-iam";
+import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 
 interface Props {
     scope: Construct;
+    logGroup: LogGroup;
+    logRole: Role;
 }
 
 interface Exports {
     vpc: Vpc;
+    securityGroup: SecurityGroup;
 }
 
-export default ({ scope }: Props): Exports => {
+export default ({ scope, logGroup, logRole }: Props): Exports => {
+    // NOTE: Creates an internet gateway and a NAT gateway depending on the subnet types. Public subnets creates a internet gateway and isolated subnets creates a NAT gateway.
     const vpc = new Vpc(scope, "VPC", {
         vpcName: "a4l-vpc1",
-        maxAzs: 4, // Default is all AZs in region
+        maxAzs: 4,
         ipAddresses: IpAddresses.cidr("10.16.0.0/16"), // 10.16.0.0 -> 10.16.255.255
         defaultInstanceTenancy: DefaultInstanceTenancy.DEFAULT,
         ipProtocol: IpProtocol.DUAL_STACK,
@@ -37,17 +49,32 @@ export default ({ scope }: Props): Exports => {
             },
             {
                 name: "Web",
-                subnetType: SubnetType.PRIVATE_ISOLATED,
+                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 cidrMask: 20,
             },
             {
                 name: "Reserved",
-                subnetType: SubnetType.PRIVATE_ISOLATED,
+                subnetType: SubnetType.PUBLIC,
                 cidrMask: 20,
-                reserved: true,
             },
         ],
     });
 
-    return { vpc };
+    const securityGroup = new SecurityGroup(scope, "SecurityGroup", {
+        vpc,
+    });
+
+    securityGroup.addIngressRule(
+        securityGroup,
+        Port.allTcp(),
+        "Allow ICMP traffic",
+    );
+
+    new FlowLog(scope, "FlowLog", {
+        resourceType: FlowLogResourceType.fromVpc(vpc),
+        destination: FlowLogDestination.toCloudWatchLogs(logGroup, logRole),
+        maxAggregationInterval: FlowLogMaxAggregationInterval.ONE_MINUTE,
+    });
+
+    return { vpc, securityGroup };
 };
