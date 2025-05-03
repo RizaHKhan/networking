@@ -30,6 +30,7 @@ export default ({ scope, vpc, securityGroup }: Props): Exports => {
             subnetType: SubnetType.PUBLIC,
         },
         securityGroup,
+        requireImdsv2: true,
         role: new Role(scope, "InstanceRole", {
             assumedBy: new ServicePrincipal("ec2.amazonaws.com"),
             managedPolicies: [

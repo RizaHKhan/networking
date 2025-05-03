@@ -3,6 +3,7 @@ import {
     IpAddresses,
     IpProtocol,
     Ipv6Addresses,
+    Port,
     SecurityGroup,
     SubnetType,
     Vpc,
@@ -54,6 +55,12 @@ export default ({ scope }: Props): Exports => {
     const securityGroup = new SecurityGroup(scope, "SecurityGroup", {
         vpc,
     });
+
+    securityGroup.addIngressRule(
+        securityGroup,
+        Port.allTcp(),
+        "Allow ICMP traffic",
+    );
 
     return { vpc, securityGroup };
 };
