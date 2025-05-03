@@ -35,6 +35,7 @@ export default ({ scope, vpc }: Props): Exports => {
         }),
         instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
         machineImage: MachineImage.latestAmazonLinux2(),
+        associatePublicIpAddress: false,
         ssmSessionPermissions: true,
     });
 
