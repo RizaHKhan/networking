@@ -2,6 +2,7 @@ import { CfnOutput, Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import networking from "./constructs/networking";
 import compute from "./constructs/compute";
+import iam from "./constructs/iam";
 
 export class NetworkingStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
@@ -9,15 +10,34 @@ export class NetworkingStack extends Stack {
 
         const { createVpc } = networking();
         const { createEc2 } = compute();
+        const { createSSMRole } = iam();
 
         const vpc1 = createVpc({ cidr: "10.16.0.0/16", scope: this });
-        const instance1 = createEc2({ scope, name: "Vpc1Instance", vpc: vpc1 });
+        const instance1 = createEc2({
+            scope: this,
+            name: "Vpc1Instance",
+            vpc: vpc1,
+            role: createSSMRole({ scope: this, name: "Vpc1InstanceSSMRole" }),
+        });
 
-        const vpc2 = createVpc({ cidr: "10.17.0.0/16", scope: this });
-        const instance2 = createEc2({ scope, name: "Vpc2Instance", vpc: vpc2 });
+        const vpc2 = createVpc({
+            cidr: "10.17.0.0/16",
+            scope: this,
+        });
+        const instance2 = createEc2({
+            scope: this,
+            name: "Vpc2Instance",
+            vpc: vpc2,
+            role: createSSMRole({ scope: this, name: "Vpc2InstanceSSMRole" }),
+        });
 
         const vpc3 = createVpc({ cidr: "10.18.0.0/16", scope: this });
-        const instance3 = createEc2({ scope, name: "Vpc3Instance", vpc: vpc3 });
+        const instance3 = createEc2({
+            scope: this,
+            name: "Vpc3Instance",
+            vpc: vpc3,
+            role: createSSMRole({ scope: this, name: "Vpc3InstanceSSMRole" }),
+        });
 
         new CfnOutput(this, "Vpc1", {
             value: vpc1.vpcId,
