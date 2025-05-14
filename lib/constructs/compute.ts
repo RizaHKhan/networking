@@ -31,6 +31,7 @@ export default (): ComputeExports => {
                 subnetType: SubnetType.PRIVATE_ISOLATED,
             },
             role,
+            requireImdsv2: true,
         });
 
     return { createEc2 };
