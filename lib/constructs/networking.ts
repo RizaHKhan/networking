@@ -8,46 +8,38 @@ import {
 } from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 
-interface Props {
+interface VpcProps {
+    cidr: string;
     scope: Construct;
 }
 
 interface Exports {
-    vpc: Vpc;
+    createVpc: ({ cidr, scope }: VpcProps) => Vpc;
 }
 
-export default ({ scope }: Props): Exports => {
-    const vpc = new Vpc(scope, "VPC", {
-        vpcName: "a4l-vpc1",
-        maxAzs: 4, // Default is all AZs in region
-        ipAddresses: IpAddresses.cidr("10.16.0.0/16"), // 10.16.0.0 -> 10.16.255.255
-        defaultInstanceTenancy: DefaultInstanceTenancy.DEFAULT,
-        ipProtocol: IpProtocol.DUAL_STACK,
-        ipv6Addresses: Ipv6Addresses.amazonProvided(),
-        subnetConfiguration: [
-            {
-                name: "DB",
-                subnetType: SubnetType.PRIVATE_ISOLATED,
-                cidrMask: 20,
-            },
-            {
-                name: "App",
-                subnetType: SubnetType.PRIVATE_ISOLATED,
-                cidrMask: 20,
-            },
-            {
-                name: "Web",
-                subnetType: SubnetType.PRIVATE_ISOLATED,
-                cidrMask: 20,
-            },
-            {
-                name: "Reserved",
-                subnetType: SubnetType.PRIVATE_ISOLATED,
-                cidrMask: 20,
-                reserved: true,
-            },
-        ],
-    });
+export default (): Exports => {
+    const createVpc = ({
+        cidr,
+        scope,
+    }: {
+        cidr: string;
+        scope: Construct;
+    }): Vpc =>
+        new Vpc(scope, `VPC-${cidr}`, {
+            vpcName: `vpc-${cidr}`,
+            maxAzs: 1, // Default is all AZs in region
+            ipAddresses: IpAddresses.cidr(cidr), // 10.16.0.0 -> 10.16.255.255
+            defaultInstanceTenancy: DefaultInstanceTenancy.DEFAULT,
+            ipProtocol: IpProtocol.DUAL_STACK,
+            ipv6Addresses: Ipv6Addresses.amazonProvided(),
+            subnetConfiguration: [
+                {
+                    name: "Web",
+                    subnetType: SubnetType.PRIVATE_ISOLATED,
+                    cidrMask: 20,
+                },
+            ],
+        });
 
-    return { vpc };
+    return { createVpc };
 };
