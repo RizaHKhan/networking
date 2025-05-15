@@ -58,7 +58,12 @@ export default (): Exports => {
             subnetConfiguration: [
                 {
                     name: "Web",
-                    subnetType: SubnetType.PRIVATE_ISOLATED,
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                    cidrMask: 20,
+                },
+                {
+                    name: "Public",
+                    subnetType: SubnetType.PUBLIC,
                     cidrMask: 20,
                 },
             ],
@@ -92,12 +97,6 @@ export default (): Exports => {
         new SecurityGroup(scope, name, {
             vpc,
         });
-
-    // securityGroup.addIngressRule(
-    //     Peer.anyIpv4(),
-    //     Port.tcp(443),
-    //     "Allow HTTPS traffic from anywhere",
-    // );
 
     return { createVpc, createPeeringConnection, createSecuritGroupForVpc };
 };

@@ -25,6 +25,7 @@ export class NetworkingStack extends Stack {
             Port.tcp(443),
             "Allow HTTPS traffic from anywhere",
         );
+        sg1.addEgressRule(Peer.anyIpv4(), Port.tcp(443), "Allow SSM traffic");
         const instance1 = createEc2({
             scope: this,
             name: "Vpc1Instance",
