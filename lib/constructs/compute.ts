@@ -32,6 +32,7 @@ export default (): ComputeExports => {
             },
             role,
             requireImdsv2: true,
+            ssmSessionPermissions: true,
         });
 
     return { createEc2 };
