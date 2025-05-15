@@ -48,8 +48,8 @@ export default (): Exports => {
         cidr: string;
         scope: Construct;
     }): Vpc =>
-        new Vpc(scope, `VPC-${cidr}`, {
-            vpcName: `vpc-${cidr}`,
+        new Vpc(scope, `VPC${cidr}`, {
+            vpcName: `VPC${cidr}`,
             maxAzs: 1, // Default is all AZs in region
             ipAddresses: IpAddresses.cidr(cidr), // 10.16.0.0 -> 10.16.255.255
             defaultInstanceTenancy: DefaultInstanceTenancy.DEFAULT,
