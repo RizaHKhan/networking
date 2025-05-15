@@ -4,6 +4,7 @@ import {
     InstanceSize,
     InstanceType,
     MachineImage,
+    SecurityGroup,
     SubnetType,
     Vpc,
 } from "aws-cdk-lib/aws-ec2";
@@ -15,6 +16,7 @@ interface Ec2Props {
     name: string;
     vpc: Vpc;
     role: Role;
+    securityGroup: SecurityGroup;
 }
 
 interface ComputeExports {
@@ -22,7 +24,13 @@ interface ComputeExports {
 }
 
 export default (): ComputeExports => {
-    const createEc2 = ({ scope, name, vpc, role }: Ec2Props): Instance =>
+    const createEc2 = ({
+        scope,
+        name,
+        vpc,
+        role,
+        securityGroup,
+    }: Ec2Props): Instance =>
         new Instance(scope, name, {
             vpc,
             instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
@@ -33,6 +41,7 @@ export default (): ComputeExports => {
             role,
             requireImdsv2: true,
             ssmSessionPermissions: true,
+            securityGroup,
         });
 
     return { createEc2 };

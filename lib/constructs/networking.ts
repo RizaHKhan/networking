@@ -6,6 +6,7 @@ import {
     SubnetType,
     Vpc,
     CfnVPCPeeringConnection,
+    SecurityGroup,
 } from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 
@@ -27,6 +28,16 @@ interface Exports {
         scope: Construct;
         name: string;
     }): CfnVPCPeeringConnection;
+
+    createSecuritGroupForVpc: ({
+        vpc,
+        scope,
+        name,
+    }: {
+        vpc: Vpc;
+        scope: Construct;
+        name: string;
+    }) => SecurityGroup;
 }
 
 export default (): Exports => {
@@ -69,5 +80,24 @@ export default (): Exports => {
             peerVpcId,
         });
 
-    return { createVpc, createPeeringConnection };
+    const createSecuritGroupForVpc = ({
+        vpc,
+        scope,
+        name,
+    }: {
+        vpc: Vpc;
+        scope: Construct;
+        name: string;
+    }): SecurityGroup =>
+        new SecurityGroup(scope, name, {
+            vpc,
+        });
+
+    // securityGroup.addIngressRule(
+    //     Peer.anyIpv4(),
+    //     Port.tcp(443),
+    //     "Allow HTTPS traffic from anywhere",
+    // );
+
+    return { createVpc, createPeeringConnection, createSecuritGroupForVpc };
 };
