@@ -8,7 +8,7 @@ export class NetworkingStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
-        const { createVpc } = networking();
+        const { createVpc, createPeeringConnection } = networking();
         const { createEc2 } = compute();
         const { createSSMRole } = iam();
 
@@ -29,6 +29,12 @@ export class NetworkingStack extends Stack {
             name: "Vpc2Instance",
             vpc: vpc2,
             role: createSSMRole({ scope: this, name: "Vpc2InstanceSSMRole" }),
+        });
+        createPeeringConnection({
+            scope: this,
+            name: "VPCPeer1-2",
+            vpcId: vpc1.vpcId,
+            peerVpcId: vpc2.vpcId,
         });
 
         const vpc3 = createVpc({ cidr: "10.18.0.0/16", scope: this });

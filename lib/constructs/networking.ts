@@ -5,6 +5,7 @@ import {
     Ipv6Addresses,
     SubnetType,
     Vpc,
+    CfnVPCPeeringConnection,
 } from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 
@@ -15,6 +16,17 @@ interface VpcProps {
 
 interface Exports {
     createVpc: ({ cidr, scope }: VpcProps) => Vpc;
+    createPeeringConnection({
+        vpcId,
+        peerVpcId,
+        scope,
+        name,
+    }: {
+        vpcId: string;
+        peerVpcId: string;
+        scope: Construct;
+        name: string;
+    }): CfnVPCPeeringConnection;
 }
 
 export default (): Exports => {
@@ -41,5 +53,21 @@ export default (): Exports => {
             ],
         });
 
-    return { createVpc };
+    const createPeeringConnection = ({
+        vpcId,
+        peerVpcId,
+        scope,
+        name,
+    }: {
+        vpcId: string;
+        peerVpcId: string;
+        scope: Construct;
+        name: string;
+    }): CfnVPCPeeringConnection =>
+        new CfnVPCPeeringConnection(scope, name, {
+            vpcId,
+            peerVpcId,
+        });
+
+    return { createVpc, createPeeringConnection };
 };
