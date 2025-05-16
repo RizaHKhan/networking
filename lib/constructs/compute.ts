@@ -36,7 +36,7 @@ export default (): ComputeExports => {
             instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
             machineImage: MachineImage.latestAmazonLinux2(),
             vpcSubnets: {
-                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                subnetType: SubnetType.PRIVATE_ISOLATED,
             },
             role,
             requireImdsv2: true,

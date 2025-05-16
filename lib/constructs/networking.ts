@@ -7,6 +7,8 @@ import {
     Vpc,
     CfnVPCPeeringConnection,
     SecurityGroup,
+    InterfaceVpcEndpoint,
+    InterfaceVpcEndpointAwsService,
 } from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 
@@ -14,6 +16,18 @@ interface VpcProps {
     cidr: string;
     scope: Construct;
 }
+
+type CreateVpcEndpoint = ({
+    scope,
+    name,
+    vpc,
+    service,
+}: {
+    scope: Construct;
+    name: string;
+    vpc: Vpc;
+    service: InterfaceVpcEndpointAwsService;
+}) => InterfaceVpcEndpoint;
 
 interface Exports {
     createVpc: ({ cidr, scope }: VpcProps) => Vpc;
@@ -38,6 +52,8 @@ interface Exports {
         scope: Construct;
         name: string;
     }) => SecurityGroup;
+
+    createVpcEndpoint: CreateVpcEndpoint;
 }
 
 export default (): Exports => {
@@ -58,12 +74,7 @@ export default (): Exports => {
             subnetConfiguration: [
                 {
                     name: "Web",
-                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-                    cidrMask: 20,
-                },
-                {
-                    name: "Public",
-                    subnetType: SubnetType.PUBLIC,
+                    subnetType: SubnetType.PRIVATE_ISOLATED,
                     cidrMask: 20,
                 },
             ],
@@ -98,5 +109,21 @@ export default (): Exports => {
             vpc,
         });
 
-    return { createVpc, createPeeringConnection, createSecuritGroupForVpc };
+    const createVpcEndpoint: CreateVpcEndpoint = ({
+        scope,
+        name,
+        vpc,
+        service,
+    }) =>
+        new InterfaceVpcEndpoint(scope, name, {
+            vpc,
+            service,
+        });
+
+    return {
+        createVpc,
+        createPeeringConnection,
+        createSecuritGroupForVpc,
+        createVpcEndpoint,
+    };
 };
