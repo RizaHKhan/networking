@@ -17,17 +17,12 @@ interface VpcProps {
     scope: Construct;
 }
 
-type CreateVpcEndpoint = ({
-    scope,
-    name,
-    vpc,
-    service,
-}: {
+interface CreateVpcEndpointProps {
     scope: Construct;
     name: string;
     vpc: Vpc;
     service: InterfaceVpcEndpointAwsService;
-}) => InterfaceVpcEndpoint;
+}
 
 interface Exports {
     createVpc: ({ cidr, scope }: VpcProps) => Vpc;
@@ -53,7 +48,7 @@ interface Exports {
         name: string;
     }) => SecurityGroup;
 
-    createVpcEndpoint: CreateVpcEndpoint;
+    createVpcEndpoint: (props: CreateVpcEndpointProps) => InterfaceVpcEndpoint;
 }
 
 export default (): Exports => {
@@ -109,12 +104,12 @@ export default (): Exports => {
             vpc,
         });
 
-    const createVpcEndpoint: CreateVpcEndpoint = ({
+    const createVpcEndpoint = ({
         scope,
         name,
         vpc,
         service,
-    }) =>
+    }: CreateVpcEndpointProps): InterfaceVpcEndpoint =>
         new InterfaceVpcEndpoint(scope, name, {
             vpc,
             service,
