@@ -9,70 +9,79 @@ import {
     SecurityGroup,
     InterfaceVpcEndpoint,
     InterfaceVpcEndpointAwsService,
+    Subnet,
+    CfnNatGateway,
+    CfnInternetGateway,
 } from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 
-interface VpcProps {
-    cidr: string;
-    scope: Construct;
+interface BaseProps {
+    name: string;
 }
 
-interface CreateVpcEndpointProps {
-    scope: Construct;
-    name: string;
+interface CreateVpcProps extends BaseProps {
+    cidr: string;
+}
+
+interface CreateVpcEndpointProps extends BaseProps {
     vpc: Vpc;
     service: InterfaceVpcEndpointAwsService;
 }
-
-interface Exports {
-    createVpc: ({ cidr, scope }: VpcProps) => Vpc;
-    createPeeringConnection({
-        vpcId,
-        peerVpcId,
-        scope,
-        name,
-    }: {
-        vpcId: string;
-        peerVpcId: string;
-        scope: Construct;
-        name: string;
-    }): CfnVPCPeeringConnection;
-
-    createSecuritGroupForVpc: ({
-        vpc,
-        scope,
-        name,
-    }: {
-        vpc: Vpc;
-        scope: Construct;
-        name: string;
-    }) => SecurityGroup;
-
-    createVpcEndpoint: (props: CreateVpcEndpointProps) => InterfaceVpcEndpoint;
+interface CreatePeeringConnectionProps extends BaseProps {
+    vpcId: string;
+    peerVpcId: string;
+    scope: Construct;
+    name: string;
 }
 
-export default (): Exports => {
-    const createVpc = ({
-        cidr,
-        scope,
-    }: {
-        cidr: string;
-        scope: Construct;
-    }): Vpc =>
-        new Vpc(scope, `VPC${cidr}`, {
+interface CreateNateGatewayProps extends BaseProps {
+    subnetId: string;
+}
+interface CreateInterenetGatewayProps extends BaseProps {}
+interface CreateSecurityGroupForVpcProps {
+    vpc: Vpc;
+    scope: Construct;
+    name: string;
+}
+
+interface CreateSubnetProps extends BaseProps {
+    vpc: Vpc;
+    cidrBlock: string;
+    availabilityZone: string;
+    optionalProps?: {
+        assignIpv6AddressOnCreation: boolean;
+        ipv6CidrBlock: string;
+        mapPublicIpOnLaunch: boolean;
+    };
+}
+
+interface Exports {
+    createVpc: (props: CreateVpcProps) => Vpc;
+    createPeeringConnection(
+        props: CreatePeeringConnectionProps,
+    ): CfnVPCPeeringConnection;
+
+    createSecuritGroupForVpc: (
+        props: CreateSecurityGroupForVpcProps,
+    ) => SecurityGroup;
+
+    createVpcEndpoint: (props: CreateVpcEndpointProps) => InterfaceVpcEndpoint;
+    createSubnet: (props: CreateSubnetProps) => Subnet;
+    createNatGateway: (props: CreateNateGatewayProps) => CfnNatGateway;
+    createInternetGateway: (
+        props: CreateInterenetGatewayProps,
+    ) => CfnInternetGateway;
+}
+
+export default (scope: Construct): Exports => {
+    const createVpc = ({ cidr, name }: CreateVpcProps): Vpc =>
+        new Vpc(scope, name, {
             vpcName: `VPC${cidr}`,
             maxAzs: 1, // Default is all AZs in region
             ipAddresses: IpAddresses.cidr(cidr), // 10.16.0.0 -> 10.16.255.255
             defaultInstanceTenancy: DefaultInstanceTenancy.DEFAULT,
             ipProtocol: IpProtocol.DUAL_STACK,
             ipv6Addresses: Ipv6Addresses.amazonProvided(),
-            subnetConfiguration: [
-                {
-                    name: "Web",
-                    subnetType: SubnetType.PRIVATE_ISOLATED,
-                    cidrMask: 20,
-                },
-            ],
         });
 
     const createPeeringConnection = ({
@@ -80,12 +89,7 @@ export default (): Exports => {
         peerVpcId,
         scope,
         name,
-    }: {
-        vpcId: string;
-        peerVpcId: string;
-        scope: Construct;
-        name: string;
-    }): CfnVPCPeeringConnection =>
+    }: CreatePeeringConnectionProps): CfnVPCPeeringConnection =>
         new CfnVPCPeeringConnection(scope, name, {
             vpcId,
             peerVpcId,
@@ -95,17 +99,12 @@ export default (): Exports => {
         vpc,
         scope,
         name,
-    }: {
-        vpc: Vpc;
-        scope: Construct;
-        name: string;
-    }): SecurityGroup =>
+    }: CreateSecurityGroupForVpcProps): SecurityGroup =>
         new SecurityGroup(scope, name, {
             vpc,
         });
 
     const createVpcEndpoint = ({
-        scope,
         name,
         vpc,
         service,
@@ -115,10 +114,34 @@ export default (): Exports => {
             service,
         });
 
+    const createSubnet = ({
+        name,
+        vpc,
+        cidrBlock,
+        availabilityZone,
+        optionalProps,
+    }: CreateSubnetProps): Subnet =>
+        new Subnet(scope, name, {
+            vpcId: vpc.vpcId,
+            availabilityZone,
+            cidrBlock,
+            ...optionalProps,
+        });
+
+    const createNatGateway = ({ name }: CreateNateGatewayProps) =>
+        new CfnNatGateway(scope, name, {
+            subnetId,
+        });
+    const createInternetGateway = ({ name }: CreateInterenetGatewayProps) =>
+        new CfnInternetGateway(scope, name, {});
+
     return {
-        createVpc,
         createPeeringConnection,
         createSecuritGroupForVpc,
+        createVpc,
         createVpcEndpoint,
+        createSubnet,
+        createNatGateway,
+        createInternetGateway,
     };
 };

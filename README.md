@@ -1,14 +1,8 @@
-# Welcome to your CDK TypeScript project
+# Task 1
 
-This is a blank project for CDK development with TypeScript.
-
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
-
-## Useful commands
-
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
+1. **Create a VPC**: Define a VPC with a CIDR block (e.g., `10.0.0.0/16`).
+2. **Add Subnets**: Create one public subnet and one private subnet within the VPC.
+3. **Attach an Internet Gateway**: Attach an Internet Gateway to the VPC and associate it with the public subnet.
+4. **Add a NAT Gateway**: Deploy a NAT Gateway in the public subnet to allow outbound internet access for the private subnet.
+5. **Deploy EC2 Instances**: Launch one EC2 instance in the public subnet and another in the private subnet.
+6. **Configure Security Groups**: Set up security groups to allow SSH access to the public instance and private communication between the two instances.
