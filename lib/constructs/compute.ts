@@ -12,7 +12,6 @@ import { Role } from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 
 interface Ec2Props {
-    scope: Construct;
     name: string;
     vpc: Vpc;
     role: Role;
@@ -20,12 +19,11 @@ interface Ec2Props {
 }
 
 interface ComputeExports {
-    createEc2: ({ scope, name }: Ec2Props) => Instance;
+    createEc2: (props: Ec2Props) => Instance;
 }
 
-export default (): ComputeExports => {
+export default (scope: Construct): ComputeExports => {
     const createEc2 = ({
-        scope,
         name,
         vpc,
         role,
