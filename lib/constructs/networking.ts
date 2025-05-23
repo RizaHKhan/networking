@@ -34,6 +34,7 @@ interface CreateVpcProps extends BaseProps {
 
 interface CreateVpcEndpointProps extends BaseProps {
     service: InterfaceVpcEndpointAwsService;
+    subnets: SubnetSelection;
 }
 interface CreatePeeringConnectionProps extends BaseProps {
     vpcId: string;
@@ -86,10 +87,12 @@ export default (scope: Construct) => {
         const createVpcEndpoint = ({
             name,
             service,
+            subnets,
         }: CreateVpcEndpointProps): InterfaceVpcEndpoint =>
             new InterfaceVpcEndpoint(scope, name, {
                 vpc,
                 service,
+                subnets,
             });
 
         return { vpc, privateSubnets, publicSubnets, createVpcEndpoint };

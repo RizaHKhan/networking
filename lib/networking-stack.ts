@@ -18,7 +18,7 @@ export class NetworkingStack extends Stack {
         const { createEc2 } = compute(this);
         const { createSSMRole } = iam(this);
 
-        const { vpc, privateSubnets } = createVpc({
+        const { vpc, privateSubnets, createVpcEndpoint } = createVpc({
             name: "TestVpc",
             cidr: "10.0.0.0/16",
             subnetConfiguration: [
@@ -27,13 +27,34 @@ export class NetworkingStack extends Stack {
                     name: "Private",
                     subnetType: SubnetType.PRIVATE_ISOLATED,
                 },
+                {
+                    cidrMask: 24,
+                    name: "Public",
+                    subnetType: SubnetType.PUBLIC, // Add a public subnet
+                },
             ],
+        });
+
+        createVpcEndpoint({
+            name: "TestVpcEndpoint",
+            service: InterfaceVpcEndpointAwsService.SSM,
+            subnets: privateSubnets,
+        });
+        createVpcEndpoint({
+            name: "TestVpcEndpointSSMMessages",
+            service: InterfaceVpcEndpointAwsService.SSM_MESSAGES,
+            subnets: privateSubnets,
+        });
+        createVpcEndpoint({
+            name: "TestVpcEndpointEC2Messages",
+            service: InterfaceVpcEndpointAwsService.EC2_MESSAGES,
+            subnets: privateSubnets,
         });
 
         const ec2 = createEc2({
             name: "TestEc2",
             vpc,
-            role: createSSMRole({ name: "SSMRole" }),
+            role: createSSMRole({ name: "TestEc2Role" }),
             vpcSubnets: privateSubnets,
         });
     }
