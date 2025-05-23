@@ -5,6 +5,8 @@ import {
     InstanceType,
     MachineImage,
     SecurityGroup,
+    Subnet,
+    SubnetSelection,
     SubnetType,
     Vpc,
 } from "aws-cdk-lib/aws-ec2";
@@ -14,8 +16,9 @@ import { Construct } from "constructs";
 interface Ec2Props {
     name: string;
     vpc: Vpc;
-    role: Role;
-    securityGroup: SecurityGroup;
+    role?: Role;
+    securityGroup?: SecurityGroup;
+    vpcSubnets: SubnetSelection;
 }
 
 interface ComputeExports {
@@ -28,14 +31,13 @@ export default (scope: Construct): ComputeExports => {
         vpc,
         role,
         securityGroup,
+        vpcSubnets,
     }: Ec2Props): Instance =>
         new Instance(scope, name, {
             vpc,
             instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
             machineImage: MachineImage.latestAmazonLinux2(),
-            vpcSubnets: {
-                subnetType: SubnetType.PRIVATE_ISOLATED,
-            },
+            vpcSubnets,
             role,
             requireImdsv2: true,
             ssmSessionPermissions: true,

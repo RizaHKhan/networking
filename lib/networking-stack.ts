@@ -7,21 +7,34 @@ import {
     InterfaceVpcEndpointAwsService,
     Peer,
     Port,
+    SubnetType,
 } from "aws-cdk-lib/aws-ec2";
 
 export class NetworkingStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
-        const {
-            createVpc,
-            createSecuritGroupForVpc,
-            createVpcEndpoint,
-            createSubnet,
-            createNatGateway,
-            createInternetGateway,
-        } = networking(this);
+        const { createVpc } = networking(this);
         const { createEc2 } = compute(this);
         const { createSSMRole } = iam(this);
+
+        const { vpc, privateSubnets } = createVpc({
+            name: "TestVpc",
+            cidr: "10.0.0.0/16",
+            subnetConfiguration: [
+                {
+                    cidrMask: 24,
+                    name: "Private",
+                    subnetType: SubnetType.PRIVATE_ISOLATED,
+                },
+            ],
+        });
+
+        const ec2 = createEc2({
+            name: "TestEc2",
+            vpc,
+            role: createSSMRole({ name: "SSMRole" }),
+            vpcSubnets: privateSubnets,
+        });
     }
 }

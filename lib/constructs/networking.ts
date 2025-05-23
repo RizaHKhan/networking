@@ -12,6 +12,8 @@ import {
     Subnet,
     CfnNatGateway,
     CfnInternetGateway,
+    SelectedSubnets,
+    SubnetSelection,
 } from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 
@@ -19,12 +21,18 @@ interface BaseProps {
     name: string;
 }
 
+interface SubnetConfiguration {
+    cidrMask: number;
+    name: string;
+    subnetType: SubnetType;
+}
+
 interface CreateVpcProps extends BaseProps {
     cidr: string;
+    subnetConfiguration: SubnetConfiguration[];
 }
 
 interface CreateVpcEndpointProps extends BaseProps {
-    vpc: Vpc;
     service: InterfaceVpcEndpointAwsService;
 }
 interface CreatePeeringConnectionProps extends BaseProps {
@@ -44,19 +52,16 @@ interface CreateSecurityGroupForVpcProps {
     name: string;
 }
 
-interface CreateSubnetProps extends BaseProps {
-    vpc: Vpc;
-    cidrBlock: string;
-    availabilityZone: string;
-    optionalProps?: {
-        assignIpv6AddressOnCreation: boolean;
-        ipv6CidrBlock: string;
-        mapPublicIpOnLaunch: boolean;
-    };
-}
-
 interface Exports {
-    createVpc: (props: CreateVpcProps) => Vpc;
+    createVpc: (props: CreateVpcProps) => {
+        vpc: Vpc;
+        privateSubnets: SubnetSelection;
+        publicSubnets: SubnetSelection;
+        createVpcEndpoint: (
+            props: CreateVpcEndpointProps,
+        ) => InterfaceVpcEndpoint;
+    };
+
     createPeeringConnection(
         props: CreatePeeringConnectionProps,
     ): CfnVPCPeeringConnection;
@@ -65,24 +70,50 @@ interface Exports {
         props: CreateSecurityGroupForVpcProps,
     ) => SecurityGroup;
 
-    createVpcEndpoint: (props: CreateVpcEndpointProps) => InterfaceVpcEndpoint;
-    createSubnet: (props: CreateSubnetProps) => Subnet;
-    createNatGateway: (props: CreateNateGatewayProps) => CfnNatGateway;
     createInternetGateway: (
         props: CreateInterenetGatewayProps,
     ) => CfnInternetGateway;
 }
 
 export default (scope: Construct): Exports => {
-    const createVpc = ({ cidr, name }: CreateVpcProps): Vpc =>
-        new Vpc(scope, name, {
-            vpcName: `VPC${cidr}`,
-            maxAzs: 1, // Default is all AZs in region
-            ipAddresses: IpAddresses.cidr(cidr), // 10.16.0.0 -> 10.16.255.255
+    const createVpc = ({
+        cidr,
+        name,
+        subnetConfiguration,
+    }: CreateVpcProps): {
+        vpc: Vpc;
+        privateSubnets: SubnetSelection;
+        publicSubnets: SubnetSelection;
+    } => {
+        const vpc = new Vpc(scope, name, {
+            vpcName: `${name}-${cidr}`,
+            maxAzs: 1,
+            ipAddresses: IpAddresses.cidr(cidr),
             defaultInstanceTenancy: DefaultInstanceTenancy.DEFAULT,
             ipProtocol: IpProtocol.DUAL_STACK,
             ipv6Addresses: Ipv6Addresses.amazonProvided(),
+            subnetConfiguration,
         });
+
+        const publicSubnets = vpc.selectSubnets({
+            subnetType: SubnetType.PUBLIC,
+        });
+
+        const privateSubnets = vpc.selectSubnets({
+            subnetType: SubnetType.PRIVATE_ISOLATED,
+        });
+
+        const createVpcEndpoint = ({
+            name,
+            service,
+        }: CreateVpcEndpointProps): InterfaceVpcEndpoint =>
+            new InterfaceVpcEndpoint(scope, name, {
+                vpc,
+                service,
+            });
+
+        return { vpc, privateSubnets, publicSubnets, createVpcEndpoint };
+    };
 
     const createPeeringConnection = ({
         vpcId,
@@ -104,34 +135,6 @@ export default (scope: Construct): Exports => {
             vpc,
         });
 
-    const createVpcEndpoint = ({
-        name,
-        vpc,
-        service,
-    }: CreateVpcEndpointProps): InterfaceVpcEndpoint =>
-        new InterfaceVpcEndpoint(scope, name, {
-            vpc,
-            service,
-        });
-
-    const createSubnet = ({
-        name,
-        vpc,
-        cidrBlock,
-        availabilityZone,
-        optionalProps,
-    }: CreateSubnetProps): Subnet =>
-        new Subnet(scope, name, {
-            vpcId: vpc.vpcId,
-            availabilityZone,
-            cidrBlock,
-            ...optionalProps,
-        });
-
-    const createNatGateway = ({ name }: CreateNateGatewayProps) =>
-        new CfnNatGateway(scope, name, {
-            subnetId,
-        });
     const createInternetGateway = ({ name }: CreateInterenetGatewayProps) =>
         new CfnInternetGateway(scope, name, {});
 
@@ -139,9 +142,6 @@ export default (scope: Construct): Exports => {
         createPeeringConnection,
         createSecuritGroupForVpc,
         createVpc,
-        createVpcEndpoint,
-        createSubnet,
-        createNatGateway,
         createInternetGateway,
     };
 };
