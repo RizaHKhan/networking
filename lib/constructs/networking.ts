@@ -52,30 +52,7 @@ interface CreateSecurityGroupForVpcProps {
     name: string;
 }
 
-interface Exports {
-    createVpc: (props: CreateVpcProps) => {
-        vpc: Vpc;
-        privateSubnets: SubnetSelection;
-        publicSubnets: SubnetSelection;
-        createVpcEndpoint: (
-            props: CreateVpcEndpointProps,
-        ) => InterfaceVpcEndpoint;
-    };
-
-    createPeeringConnection(
-        props: CreatePeeringConnectionProps,
-    ): CfnVPCPeeringConnection;
-
-    createSecuritGroupForVpc: (
-        props: CreateSecurityGroupForVpcProps,
-    ) => SecurityGroup;
-
-    createInternetGateway: (
-        props: CreateInterenetGatewayProps,
-    ) => CfnInternetGateway;
-}
-
-export default (scope: Construct): Exports => {
+export default (scope: Construct) => {
     const createVpc = ({
         cidr,
         name,
@@ -84,6 +61,9 @@ export default (scope: Construct): Exports => {
         vpc: Vpc;
         privateSubnets: SubnetSelection;
         publicSubnets: SubnetSelection;
+        createVpcEndpoint: (
+            props: CreateVpcEndpointProps,
+        ) => InterfaceVpcEndpoint;
     } => {
         const vpc = new Vpc(scope, name, {
             vpcName: `${name}-${cidr}`,
