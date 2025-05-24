@@ -1,3 +1,4 @@
+import { CfnOutput } from "aws-cdk-lib";
 import {
     Instance,
     InstanceClass,
@@ -32,8 +33,8 @@ export default (scope: Construct): ComputeExports => {
         role,
         securityGroup,
         vpcSubnets,
-    }: Ec2Props): Instance =>
-        new Instance(scope, name, {
+    }: Ec2Props): Instance => {
+        const instance = new Instance(scope, name, {
             vpc,
             instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
             machineImage: MachineImage.latestAmazonLinux2(),
@@ -43,6 +44,14 @@ export default (scope: Construct): ComputeExports => {
             ssmSessionPermissions: true,
             securityGroup,
         });
+
+        new CfnOutput(scope, `${name}PublicIp`, {
+            value: instance.instanceId,
+            description: "Instance ID",
+        });
+
+        return instance;
+    };
 
     return { createEc2 };
 };

@@ -1,3 +1,4 @@
+import { CfnOutput } from "aws-cdk-lib";
 import {
     DefaultInstanceTenancy,
     IpAddresses,
@@ -74,6 +75,11 @@ export default (scope: Construct) => {
             ipProtocol: IpProtocol.DUAL_STACK,
             ipv6Addresses: Ipv6Addresses.amazonProvided(),
             subnetConfiguration,
+        });
+
+        new CfnOutput(scope, "VpcId", {
+            description: "VPC",
+            value: vpc.vpcId,
         });
 
         const publicSubnets = vpc.selectSubnets({

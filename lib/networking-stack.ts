@@ -30,7 +30,7 @@ export class NetworkingStack extends Stack {
                 {
                     cidrMask: 24,
                     name: "Public",
-                    subnetType: SubnetType.PUBLIC, // Add a public subnet
+                    subnetType: SubnetType.PUBLIC,
                 },
             ],
         });
