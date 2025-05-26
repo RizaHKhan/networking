@@ -15,6 +15,8 @@ import {
     CfnInternetGateway,
     SelectedSubnets,
     SubnetSelection,
+    Peer,
+    Port,
 } from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 
@@ -59,6 +61,7 @@ export default (scope: Construct) => {
         subnetConfiguration,
     }: CreateVpcProps): {
         vpc: Vpc;
+        securityGroup: SecurityGroup;
         privateSubnets: SubnetSelection;
         publicSubnets: SubnetSelection;
         createVpcEndpoint: (
@@ -99,7 +102,21 @@ export default (scope: Construct) => {
                 subnets,
             });
 
-        return { vpc, privateSubnets, publicSubnets, createVpcEndpoint };
+        const securityGroup = new SecurityGroup(
+            scope,
+            `${name}-securityGroup`,
+            {
+                vpc,
+            },
+        );
+
+        return {
+            vpc,
+            securityGroup,
+            privateSubnets,
+            publicSubnets,
+            createVpcEndpoint,
+        };
     };
 
     const createPeeringConnection = ({
@@ -112,20 +129,11 @@ export default (scope: Construct) => {
             peerVpcId,
         });
 
-    const createSecuritGroupForVpc = ({
-        vpc,
-        name,
-    }: CreateSecurityGroupForVpcProps): SecurityGroup =>
-        new SecurityGroup(scope, name, {
-            vpc,
-        });
-
     const createInternetGateway = ({ name }: CreateInterenetGatewayProps) =>
         new CfnInternetGateway(scope, name, {});
 
     return {
         createPeeringConnection,
-        createSecuritGroupForVpc,
         createVpc,
         createInternetGateway,
     };
