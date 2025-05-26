@@ -40,7 +40,6 @@ interface CreateVpcEndpointProps extends BaseProps {
 interface CreatePeeringConnectionProps extends BaseProps {
     vpcId: string;
     peerVpcId: string;
-    scope: Construct;
     name: string;
 }
 
@@ -50,7 +49,6 @@ interface CreateNateGatewayProps extends BaseProps {
 interface CreateInterenetGatewayProps extends BaseProps {}
 interface CreateSecurityGroupForVpcProps {
     vpc: Vpc;
-    scope: Construct;
     name: string;
 }
 
@@ -77,7 +75,7 @@ export default (scope: Construct) => {
             subnetConfiguration,
         });
 
-        new CfnOutput(scope, "VpcId", {
+        new CfnOutput(scope, `${name}-VpcId`, {
             description: "VPC",
             value: vpc.vpcId,
         });
@@ -107,7 +105,6 @@ export default (scope: Construct) => {
     const createPeeringConnection = ({
         vpcId,
         peerVpcId,
-        scope,
         name,
     }: CreatePeeringConnectionProps): CfnVPCPeeringConnection =>
         new CfnVPCPeeringConnection(scope, name, {
@@ -117,7 +114,6 @@ export default (scope: Construct) => {
 
     const createSecuritGroupForVpc = ({
         vpc,
-        scope,
         name,
     }: CreateSecurityGroupForVpcProps): SecurityGroup =>
         new SecurityGroup(scope, name, {
