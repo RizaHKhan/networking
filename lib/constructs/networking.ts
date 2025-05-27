@@ -61,7 +61,7 @@ export default (scope: Construct) => {
         subnetConfiguration,
     }: CreateVpcProps): {
         vpc: Vpc;
-        securityGroup: SecurityGroup;
+        createSecurityGroup: (name: string) => SecurityGroup;
         privateSubnets: SubnetSelection;
         publicSubnets: SubnetSelection;
         createVpcEndpoint: (
@@ -102,17 +102,14 @@ export default (scope: Construct) => {
                 subnets,
             });
 
-        const securityGroup = new SecurityGroup(
-            scope,
-            `${name}-securityGroup`,
-            {
+        const createSecurityGroup = (name: string) =>
+            new SecurityGroup(scope, `${name}-securityGroup`, {
                 vpc,
-            },
-        );
+            });
 
         return {
             vpc,
-            securityGroup,
+            createSecurityGroup,
             privateSubnets,
             publicSubnets,
             createVpcEndpoint,
