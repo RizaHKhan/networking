@@ -11,6 +11,7 @@ import {
     SubnetType,
     Vpc,
 } from "aws-cdk-lib/aws-ec2";
+import { Cluster } from "aws-cdk-lib/aws-ecs";
 import { Role } from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 
@@ -22,8 +23,15 @@ interface Ec2Props {
     vpcSubnets: SubnetSelection;
 }
 
+interface ClusterProps {
+    vpc: Vpc;
+    name: string;
+    clusterName?: string;
+}
+
 interface ComputeExports {
     createEc2: (props: Ec2Props) => Instance;
+    createCluster: (props: ClusterProps) => Cluster;
 }
 
 export default (scope: Construct): ComputeExports => {
@@ -53,5 +61,11 @@ export default (scope: Construct): ComputeExports => {
         return instance;
     };
 
-    return { createEc2 };
+    const createCluster = ({ vpc, name, clusterName }: ClusterProps): Cluster =>
+        new Cluster(scope, name, {
+            vpc,
+            clusterName,
+        });
+
+    return { createEc2, createCluster };
 };

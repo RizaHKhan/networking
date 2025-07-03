@@ -33,6 +33,7 @@ interface SubnetConfiguration {
 interface CreateVpcProps extends BaseProps {
     cidr: string;
     subnetConfiguration: SubnetConfiguration[];
+    props: any;
 }
 
 interface CreateVpcEndpointProps extends BaseProps {
@@ -54,16 +55,22 @@ interface CreateSecurityGroupForVpcProps {
     name: string;
 }
 
+interface SecurityGroupProps extends BaseProps {
+    props?: any;
+}
+
 export default (scope: Construct) => {
     const createVpc = ({
         cidr,
         name,
         subnetConfiguration,
+        props = {},
     }: CreateVpcProps): {
         vpc: Vpc;
-        securityGroup: SecurityGroup;
         privateSubnets: SubnetSelection;
         publicSubnets: SubnetSelection;
+        props?: any;
+        createSecurityGroup: (props: SecurityGroupProps) => SecurityGroup;
         createVpcEndpoint: (
             props: CreateVpcEndpointProps,
         ) => InterfaceVpcEndpoint;
@@ -76,6 +83,7 @@ export default (scope: Construct) => {
             ipProtocol: IpProtocol.DUAL_STACK,
             ipv6Addresses: Ipv6Addresses.amazonProvided(),
             subnetConfiguration,
+            ...props,
         });
 
         new CfnOutput(scope, `${name}-VpcId`, {
@@ -102,19 +110,23 @@ export default (scope: Construct) => {
                 subnets,
             });
 
-        const securityGroup = new SecurityGroup(
-            scope,
-            `${name}-securityGroup`,
-            {
+        const createSecurityGroup = ({
+            name,
+            props,
+        }: {
+            name: string;
+            props?: any;
+        }) =>
+            new SecurityGroup(scope, `${name}-securityGroup`, {
                 vpc,
-            },
-        );
+                ...props,
+            });
 
         return {
             vpc,
-            securityGroup,
             privateSubnets,
             publicSubnets,
+            createSecurityGroup,
             createVpcEndpoint,
         };
     };
